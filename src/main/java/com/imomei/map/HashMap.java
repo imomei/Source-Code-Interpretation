@@ -16,28 +16,31 @@ import java.util.function.Function;
 public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Cloneable, Serializable {
 
     private static final long serialVersionUID = 362498820763181265L;
-    // 常量：数组容量16
+    // 常量：Hash表的数组容量16（底层移位效率最高）
     static final int DEFAULT_INITIAL_CAPACITY = 1 << 4;
-    // 常量：
+    // 常量：Map最大容量2的30次方
     static final int MAXIMUM_CAPACITY = 1 << 30;
-    // 常量：
+    // 常量：用于扩容的加载因子0.75
     static final float DEFAULT_LOAD_FACTOR = 0.75f;
-    // 常量：
+    // 常量：链表转红黑树阈值8
     static final int TREEIFY_THRESHOLD = 8;
-
-    // 常量：
+    // 常量：红黑树转链表阈值6
     static final int UNTREEIFY_THRESHOLD = 6;
-
-    // 常量：
+    // 常量：Map树化值的最小值为64
     static final int MIN_TREEIFY_CAPACITY = 64;
 
-    // 常量：
+    // 内部类：Node实现了Map的内部接口Entry，每个节点都代表一个key，value对
     static class Node<K, V> implements Entry<K, V> {
+        // key的hash值
         final int hash;
+        // key
         final K key;
+        // value
         V value;
+        // 下一个节点Node
         Node<K, V> next;
 
+        // 全参构造器
         Node(int hash, K key, V value, Node<K, V> next) {
             this.hash = hash;
             this.key = key;
@@ -45,68 +48,53 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
             this.next = next;
         }
 
+        // 取key
         public final K getKey() {
             return key;
         }
 
+        // 取value
         public final V getValue() {
             return value;
         }
 
+        // 打印
         public final String toString() {
             return key + "=" + value;
         }
 
+        // 计算哈希
         public final int hashCode() {
             return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
 
+        // 存value并返回旧value
         public final V setValue(V newValue) {
             V oldValue = value;
             value = newValue;
             return oldValue;
         }
 
+        // 判断是否相等
         public final boolean equals(Object o) {
             if (o == this)
                 return true;
             if (o instanceof Map.Entry) {
                 Entry<?, ?> e = (Entry<?, ?>) o;
-                if (Objects.equals(key, e.getKey()) &&
-                        Objects.equals(value, e.getValue()))
+                // 只有当key和value都相等才返回true
+                if (Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue()))
                     return true;
             }
             return false;
         }
     }
 
-    /* ---------------- Static utilities -------------- */
-
-    /**
-     * Computes key.hashCode() and spreads (XORs) higher bits of hash
-     * to lower.  Because the table uses power-of-two masking, sets of
-     * hashes that vary only in bits above the current mask will
-     * always collide. (Among known examples are sets of Float keys
-     * holding consecutive whole numbers in small tables.)  So we
-     * apply a transform that spreads the impact of higher bits
-     * downward. There is a tradeoff between speed, utility, and
-     * quality of bit-spreading. Because many common sets of hashes
-     * are already reasonably distributed (so don't benefit from
-     * spreading), and because we use trees to handle large sets of
-     * collisions in bins, we just XOR some shifted bits in the
-     * cheapest possible way to reduce systematic lossage, as well as
-     * to incorporate impact of the highest bits that would otherwise
-     * never be used in index calculations because of table bounds.
-     */
+    // 方法：返回Hash值
     static final int hash(Object key) {
         int h;
         return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
     }
 
-    /**
-     * Returns x's Class if it is of the form "class C implements
-     * Comparable<C>", else null.
-     */
     static Class<?> comparableClassFor(Object x) {
         if (x instanceof Comparable) {
             Class<?> c;
@@ -129,19 +117,12 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         return null;
     }
 
-    /**
-     * Returns k.compareTo(x) if x matches kc (k's screened comparable
-     * class), else 0.
-     */
     @SuppressWarnings({"rawtypes", "unchecked"}) // for cast to Comparable
     static int compareComparables(Class<?> kc, Object k, Object x) {
         return (x == null || x.getClass() != kc ? 0 :
                 ((Comparable) k).compareTo(x));
     }
 
-    /**
-     * Returns a power of two size for the given target capacity.
-     */
     static final int tableSizeFor(int cap) {
         int n = cap - 1;
         n |= n >>> 1;
@@ -152,52 +133,18 @@ public class HashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>, Clone
         return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
     }
 
-    /* ---------------- Fields -------------- */
 
-    /**
-     * The table, initialized on first use, and resized as
-     * necessary. When allocated, length is always a power of two.
-     * (We also tolerate length zero in some operations to allow
-     * bootstrapping mechanics that are currently not needed.)
-     */
+    // 属性：保存节点数组。transient关键字标记的成员变量不参与序列化过程
     transient Node<K, V>[] table;
-
-    /**
-     * Holds cached entrySet(). Note that AbstractMap fields are used
-     * for keySet() and values().
-     */
+    // 属性：保存节点集合
     transient Set<Entry<K, V>> entrySet;
-
-    /**
-     * The number of key-value mappings contained in this map.
-     */
+    // 属性：保存大小
     transient int size;
-
-    /**
-     * The number of times this HashMap has been structurally modified
-     * Structural modifications are those that change the number of mappings in
-     * the HashMap or otherwise modify its internal structure (e.g.,
-     * rehash).  This field is used to make iterators on Collection-views of
-     * the HashMap fail-fast.  (See ConcurrentModificationException).
-     */
+    // 属性：
     transient int modCount;
-
-    /**
-     * The next size value at which to resize (capacity * load factor).
-     *
-     * @serial
-     */
-    // (The javadoc description is true upon serialization.
-    // Additionally, if the table array has not been allocated, this
-    // field holds the initial array capacity, or zero signifying
-    // DEFAULT_INITIAL_CAPACITY.)
+    // 属性：
     int threshold;
-
-    /**
-     * The load factor for the hash table.
-     *
-     * @serial
-     */
+    // 属性：
     final float loadFactor;
 
     /* ---------------- Public operations -------------- */
