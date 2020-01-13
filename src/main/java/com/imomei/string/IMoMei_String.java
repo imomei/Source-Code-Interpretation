@@ -18,7 +18,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
     private static final long serialVersionUID = -6849794470754667710L;
     // 属性：储存每个字符
     private final char value[];
-    // 属性：储存字符串Hash值
+    // 属性：储存整个字符串Hash值
     private int hash;
 
     private static final ObjectStreamField[] serialPersistentFields = new ObjectStreamField[0];
@@ -134,10 +134,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         this(ascii, hibyte, 0, ascii.length);
     }
 
-    /* Common private utility method used to bounds check the byte array
-     * and requested offset & length values used by the String(byte[],..)
-     * constructors.
-     */
+    // 方法：检查界限，主要检查
     private static void checkBounds(byte[] bytes, int offset, int length) {
         if (length < 0)
             throw new StringIndexOutOfBoundsException(length);
@@ -202,17 +199,17 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         this.value = value;
     }
 
-    // 返回String长度
+    // 方法：返回String长度
     public int length() {
         return value.length;
     }
 
-    // 判断String长度是否为0
+    // 方法：判断String长度是否为0
     public boolean isEmpty() {
         return value.length == 0;
     }
 
-    // 获取指定下标的char字符
+    // 方法：获取指定下标的char字符
     public char charAt(int index) {
         // 小于0和大于最大长度校验
         if ((index < 0) || (index >= value.length)) {
@@ -221,7 +218,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         return value[index];
     }
 
-    //
+    // 方法：代码点
     public int codePointAt(int index) {
         if ((index < 0) || (index >= value.length)) {
             throw new StringIndexOutOfBoundsException(index);
@@ -259,27 +256,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         return Character.codePointBeforeImpl(value, index, 0);
     }
 
-    /**
-     * Returns the number of Unicode code points in the specified text
-     * range of this {@code String}. The text range begins at the
-     * specified {@code beginIndex} and extends to the
-     * {@code char} at index {@code endIndex - 1}. Thus the
-     * length (in {@code char}s) of the text range is
-     * {@code endIndex-beginIndex}. Unpaired surrogates within
-     * the text range count as one code point each.
-     *
-     * @param beginIndex the index to the first {@code char} of
-     *                   the text range.
-     * @param endIndex   the index after the last {@code char} of
-     *                   the text range.
-     * @return the number of Unicode code points in the specified text
-     * range
-     * @throws IndexOutOfBoundsException if the
-     *                                   {@code beginIndex} is negative, or {@code endIndex}
-     *                                   is larger than the length of this {@code String}, or
-     *                                   {@code beginIndex} is larger than {@code endIndex}.
-     * @since 1.5
-     */
+
     public int codePointCount(int beginIndex, int endIndex) {
         if (beginIndex < 0 || endIndex > value.length || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException();
@@ -287,26 +264,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         return Character.codePointCountImpl(value, beginIndex, endIndex - beginIndex);
     }
 
-    /**
-     * Returns the index within this {@code String} that is
-     * offset from the given {@code index} by
-     * {@code codePointOffset} code points. Unpaired surrogates
-     * within the text range given by {@code index} and
-     * {@code codePointOffset} count as one code point each.
-     *
-     * @param index           the index to be offset
-     * @param codePointOffset the offset in code points
-     * @return the index within this {@code String}
-     * @throws IndexOutOfBoundsException if {@code index}
-     *                                   is negative or larger then the length of this
-     *                                   {@code String}, or if {@code codePointOffset} is positive
-     *                                   and the substring starting with {@code index} has fewer
-     *                                   than {@code codePointOffset} code points,
-     *                                   or if {@code codePointOffset} is negative and the substring
-     *                                   before {@code index} has fewer than the absolute value
-     *                                   of {@code codePointOffset} code points.
-     * @since 1.5
-     */
+
     public int offsetByCodePoints(int index, int codePointOffset) {
         if (index < 0 || index > value.length) {
             throw new IndexOutOfBoundsException();
@@ -315,44 +273,12 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
                 index, codePointOffset);
     }
 
-    /**
-     * Copy characters from this string into dst starting at dstBegin.
-     * This method doesn't perform any range checking.
-     */
+
     void getChars(char dst[], int dstBegin) {
         System.arraycopy(value, 0, dst, dstBegin, value.length);
     }
 
-    /**
-     * Copies characters from this string into the destination character
-     * array.
-     * <p>
-     * The first character to be copied is at index {@code srcBegin};
-     * the last character to be copied is at index {@code srcEnd-1}
-     * (thus the total number of characters to be copied is
-     * {@code srcEnd-srcBegin}). The characters are copied into the
-     * subarray of {@code dst} starting at index {@code dstBegin}
-     * and ending at index:
-     * <blockquote><pre>
-     *     dstBegin + (srcEnd-srcBegin) - 1
-     * </pre></blockquote>
-     *
-     * @param srcBegin index of the first character in the string
-     *                 to copy.
-     * @param srcEnd   index after the last character in the string
-     *                 to copy.
-     * @param dst      the destination array.
-     * @param dstBegin the start offset in the destination array.
-     * @throws IndexOutOfBoundsException If any of the following
-     *                                   is true:
-     *                                   <ul><li>{@code srcBegin} is negative.
-     *                                   <li>{@code srcBegin} is greater than {@code srcEnd}
-     *                                   <li>{@code srcEnd} is greater than the length of this
-     *                                   string
-     *                                   <li>{@code dstBegin} is negative
-     *                                   <li>{@code dstBegin+(srcEnd-srcBegin)} is larger than
-     *                                   {@code dst.length}</ul>
-     */
+
     public void getChars(int srcBegin, int srcEnd, char dst[], int dstBegin) {
         if (srcBegin < 0) {
             throw new StringIndexOutOfBoundsException(srcBegin);
@@ -366,39 +292,7 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
     }
 
-    /**
-     * Copies characters from this string into the destination byte array. Each
-     * byte receives the 8 low-order bits of the corresponding character. The
-     * eight high-order bits of each character are not copied and do not
-     * participate in the transfer in any way.
-     *
-     * <p> The first character to be copied is at index {@code srcBegin}; the
-     * last character to be copied is at index {@code srcEnd-1}.  The total
-     * number of characters to be copied is {@code srcEnd-srcBegin}. The
-     * characters, converted to bytes, are copied into the subarray of {@code
-     * dst} starting at index {@code dstBegin} and ending at index:
-     *
-     * <blockquote><pre>
-     *     dstBegin + (srcEnd-srcBegin) - 1
-     * </pre></blockquote>
-     *
-     * @param srcBegin Index of the first character in the string to copy
-     * @param srcEnd   Index after the last character in the string to copy
-     * @param dst      The destination array
-     * @param dstBegin The start offset in the destination array
-     * @throws IndexOutOfBoundsException If any of the following is true:
-     *                                   <ul>
-     *                                   <li> {@code srcBegin} is negative
-     *                                   <li> {@code srcBegin} is greater than {@code srcEnd}
-     *                                   <li> {@code srcEnd} is greater than the length of this String
-     *                                   <li> {@code dstBegin} is negative
-     *                                   <li> {@code dstBegin+(srcEnd-srcBegin)} is larger than {@code
-     *                                   dst.length}
-     *                                   </ul>
-     * @deprecated This method does not properly convert characters into
-     * bytes.  As of JDK&nbsp;1.1, the preferred way to do this is via the
-     * {@link #getBytes()} method, which uses the platform's default charset.
-     */
+
     @Deprecated
     public void getBytes(int srcBegin, int srcEnd, byte dst[], int dstBegin) {
         if (srcBegin < 0) {
@@ -422,42 +316,14 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         }
     }
 
-    /**
-     * Encodes this {@code String} into a sequence of bytes using the named
-     * charset, storing the result into a new byte array.
-     *
-     * <p> The behavior of this method when this string cannot be encoded in
-     * the given charset is unspecified.  The {@link
-     * java.nio.charset.CharsetEncoder} class should be used when more control
-     * over the encoding process is required.
-     *
-     * @param charsetName The name of a supported {@linkplain java.nio.charset.Charset
-     *                    charset}
-     * @return The resultant byte array
-     * @throws UnsupportedEncodingException If the named charset is not supported
-     * @since JDK1.1
-     */
+
     public byte[] getBytes(java.lang.String charsetName)
             throws UnsupportedEncodingException {
         if (charsetName == null) throw new NullPointerException();
         return StringCoding.encode(charsetName, value, 0, value.length);
     }
 
-    /**
-     * Encodes this {@code String} into a sequence of bytes using the given
-     * {@linkplain java.nio.charset.Charset charset}, storing the result into a
-     * new byte array.
-     *
-     * <p> This method always replaces malformed-input and unmappable-character
-     * sequences with this charset's default replacement byte array.  The
-     * {@link java.nio.charset.CharsetEncoder} class should be used when more
-     * control over the encoding process is required.
-     *
-     * @param charset The {@linkplain java.nio.charset.Charset} to be used to encode
-     *                the {@code String}
-     * @return The resultant byte array
-     * @since 1.6
-     */
+
     public byte[] getBytes(Charset charset) {
         if (charset == null) throw new NullPointerException();
         return StringCoding.encode(charset, value, 0, value.length);
@@ -2597,28 +2463,5 @@ public class IMoMei_String implements java.io.Serializable, Comparable<java.lang
         return Double.toString(d);
     }
 
-    /**
-     * Returns a canonical representation for the string object.
-     * <p>
-     * A pool of strings, initially empty, is maintained privately by the
-     * class {@code String}.
-     * <p>
-     * When the intern method is invoked, if the pool already contains a
-     * string equal to this {@code String} object as determined by
-     * the {@link #equals(Object)} method, then the string from the pool is
-     * returned. Otherwise, this {@code String} object is added to the
-     * pool and a reference to this {@code String} object is returned.
-     * <p>
-     * It follows that for any two strings {@code s} and {@code t},
-     * {@code s.intern() == t.intern()} is {@code true}
-     * if and only if {@code s.equals(t)} is {@code true}.
-     * <p>
-     * All literal strings and string-valued constant expressions are
-     * interned. String literals are defined in section 3.10.5 of the
-     * <cite>The Java&trade; Language Specification</cite>.
-     *
-     * @return a string that has the same contents as this string, but is
-     * guaranteed to be from a pool of unique strings.
-     */
     public native java.lang.String intern();
 }
